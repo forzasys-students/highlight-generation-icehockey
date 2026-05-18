@@ -1,0 +1,5 @@
+opencv-python-headless==4.11.0.86
+openpyxl==3.1.5
+sportsbd==0.1.2
+torch==2.11.0
+torchvision==0.26.0
