@@ -195,16 +195,16 @@ python3 highlights_main.py \
 
 ---
 
-## Fullt eksempel
+## Et mer detaljert eksempel
 
 **URL anonymisert:**
 
 ```bash
 python3 highlights_main.py \
   --events_url "https://lenkeTilAPI.com/.../game/<GAME_ID>/events" \
-  --model "/Users/magnus/Desktop/modeller/best_model_resnet34.pth" \
-  --out "/Users/magnus/Desktop/highlight_game_id_<GAME_ID>/highlights_<GAME_ID>.mp4" \
-  --workdir "/Users/magnus/Desktop/workdir_game_id_<GAME_ID>/" \
+  --model "/...../modeller/best_model_resnet34.pth" \
+  --out "/...../highlight_game_id_<GAME_ID>/highlights_<GAME_ID>.mp4" \
+  --workdir "/...../workdir_game_id_<GAME_ID>/" \
   --highlight_sec 120 \
   --export_xlsx \
   --keep_workdir
@@ -228,7 +228,7 @@ python3 highlights_main.py --help
 2. Finner mål  
 3. Henter score før/etter mål  
 4. Laster ned videoklipp  
-5. Kjører **SportSBD / sportsbd**  
+5. Kjører SportSBD / sportsbd 
 6. Finner shots og logoer  
 7. Klassifiserer kameravinkler  
 8. Deler video i:  
