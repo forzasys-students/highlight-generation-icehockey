@@ -1,4 +1,4 @@
-# Automatic Hockey Highlight Generator
+# Automatisk Generering av Hockeyhøydepunkter
 
 Dette prosjektet genererer automatisk highlight-videoer fra ishockeykamper ved hjelp av:
 
