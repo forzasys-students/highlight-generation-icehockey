@@ -317,5 +317,5 @@ python3 highlights_main.py --help
 
 ---
 ## Eksempler på genererte høydepunktvideoer ved hjelp av pipelinen kan ses her:
-https://www.youtube.com/watch?v=4AP-YPExvCE&list=PLYmB0x6MhzbEaTndqWwF1BemEVxiXNCH5&index=6
+https://www.youtube.com/watch?v=fFWW_p3nbCc&list=PLYmB0x6MhzbEaTndqWwF1BemEVxiXNCH5&index=1
 ---
