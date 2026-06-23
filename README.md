@@ -1,30 +1,42 @@
-# Automatisk Generering av Hockeyhøydepunkter
+# Automatic Hockey Highlight Generation
 
-Dette prosjektet genererer automatisk highlight-videoer fra ishockeykamper ved hjelp av:
+This project automatically generates **ice hockey goal highlight reels** from structured game event data. The pipeline combines event metadata, broadcast video analysis, deep learning, and FFmpeg-based rendering to produce a complete highlight video.
 
-* event-data (målhendelser)
-* videoanalyse
-* SportSBD (sportsbd) for shot boundary detection
-* kameravinkelklassifisering (deep learning)
-* ffmpeg for rendering
+The system uses:
 
-Resultatet er en ferdig highlight-video med:
+* Structured event data (goal events)
+* Video analysis
+* SportSBD (`sportsbd`) for shot boundary and logo transition detection
+* Deep learning-based camera-view classification
+* FFmpeg for video processing and rendering
 
-* intro  
-* målsekvenser  
-* score før/etter mål  
-* scorer-informasjon  
-* glatte overganger  
+The generated highlight reel includes:
+
+* Intro sequence
+* Goal highlights in chronological order
+* Score overlays before and after each goal
+* Goal scorer information
+* Team logos
+* Optional replay footage
+* Smooth transitions between highlights
 
 ---
 
-# Prosjektstruktur
+# Requirements
 
-```bash
+* Python 3.10 or newer
+* FFmpeg (including `ffprobe`)
+* Internet connection (required on the first run to download the SportSBD model)
+
+---
+
+# Project Structure
+
+```text
 VIDEO_HIGHLIGHT_GENERATION/
 │
 ├── assets/
-│   ├── arial.ttf
+│   ├── Arial.ttf
 │   ├── background.png
 │   ├── scoreboard.png
 │   ├── scoredBy.png
@@ -37,184 +49,209 @@ VIDEO_HIGHLIGHT_GENERATION/
 ├── segments.py
 ├── utils.py
 ├── validators.py
+│
 ├── requirements.txt
-├── README.md
+└── README.md
 ```
 
 ---
 
-# Før du kjører
+# Installation
 
-## 1. Opprett virtual environment (anbefalt)
+## 1. Create a Virtual Environment (Recommended)
 
 ```bash
 python3 -m venv venv
-source venv/bin/activate   # Mac/Linux
-venv\Scripts\activate      # Windows
+
+# macOS / Linux
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
 ```
 
-## 2. Installer avhengigheter
+---
+
+## 2. Install Python Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 3. Installer FFmpeg
+The project depends on:
 
-Sjekk:
+```text
+opencv-python-headless==4.11.0.86
+openpyxl==3.1.5
+sportsbd==0.1.2
+torch==2.11.0
+torchvision==0.26.0
+```
+
+---
+
+## 3. Install FFmpeg
+
+Verify that FFmpeg is available:
 
 ```bash
 ffmpeg -version
 ffprobe -version
 ```
 
-Hvis ikke installert → installer og legg i PATH.
+If FFmpeg is not installed, install it and ensure both `ffmpeg` and `ffprobe` are available in your system `PATH`.
 
 ---
 
-## 4. Kameramodell
+# Camera Classification Model
 
-Du må ha en modell-checkpoint:
+A trained **camera-view classification model** is required.
+
+Specify the checkpoint using:
 
 ```bash
 --model path/to/model.pth
 ```
 
-Modellen må støtte disse klassene:
+The model must support the following camera classes:
 
-* behind_the_goal  
-* close_up_player_or_field_referee  
-* close_up_side_or_staff  
-* main_camera_center  
-* main_camera_left  
-* main_camera_right  
-* public_or_fans  
+* behind_the_goal
+* close_up_player_or_field_referee
+* close_up_side_or_staff
+* main_camera_center
+* main_camera_left
+* main_camera_right
+* public_or_fans
 
 ---
 
-## 5. Assets
+# Assets
 
-Disse brukes i rendering:
+The following assets are required during rendering:
 
 * `assets/background.png`
 * `assets/scoreboard.png`
 * `assets/scoredBy.png`
-* `assets/arial.ttf`
+
 
 ---
 
-## 6. SportSBD (sportsbd)
+# SportSBD
 
-Brukes til:
+SportSBD (`sportsbd`) is responsible for:
 
-* shot boundary detection  
-* finne logo-overganger  
-* strukturere videoen  
+* Shot boundary detection
+* Logo transition detection
+* Initial video segmentation
 
-Modellen lastes automatisk første gang (krever internett).
+The required model checkpoint is downloaded automatically the first time the pipeline is executed.
 
 ---
 
-# Hvordan finne `game_id`
+# Finding the Game ID
 
-## 1. Hent kamper i en periode
+## 1. Retrieve Games Within a Date Range
 
-**URL anonymisert:**
+**URL anonymized**
 
 ```text
-https://lenkeTilAPI.com/.../game?from_date=2026-03-01&to_date=2026-03-15
+https://example-api.com/.../game?from_date=2026-03-01&to_date=2026-03-15
 ```
 
-Gir liste over kamper.
+This endpoint returns a list of available games.
 
 ---
 
-## 2. Hent events for en kamp
+## 2. Retrieve Events for a Game
 
-**URL anonymisert:**
+**URL anonymized**
 
 ```text
-https://lenkeTilAPI.com/.../game/<GAME_ID>/events
+https://example-api.com/.../game/<GAME_ID>/events
 ```
 
-Brukes som input til pipelinen.
+This endpoint returns the structured event data used by the highlight generation pipeline.
 
 ---
 
-# Default highlight-lengde
+# Default Highlight Duration
 
-## Automatisk beregning
-
-Hvis du **ikke setter `--highlight_sec`**, brukes:
+If `--highlight_sec` is not specified, the target highlight duration is computed automatically as:
 
 ```python
 highlight_sec = len(goals) * 22.0
 ```
 
-### Eksempler
+### Examples
 
-| Antall mål | Lengde   |
-| ---------- | -------- |
-| 1          | ~22 sek  |
-| 3          | ~66 sek  |
-| 5          | ~110 sek |
+| Goals | Target Highlight Duration |
+| ----: | ------------------------: |
+|     1 |               ~22 seconds |
+|     3 |               ~66 seconds |
+|     5 |              ~110 seconds |
 
-Lengden **avhenger av antall mål**
+By default, the target highlight duration scales linearly with the number of detected goals.
 
----
-
-## Intro
-
-* 3 sekunder reserveres til intro  
-* resten brukes til klipp  
+A three-second intro is reserved automatically, and the remaining time budget is allocated to the goal highlights.
 
 ---
 
-# Justere lengden
+# Custom Highlight Duration
+
+Specify a custom target duration:
 
 ```bash
 --highlight_sec 120
 ```
 
-Overstyrer automatisk lengde.
+This overrides the automatically calculated duration.
 
 ---
 
-# Hvordan kjøre
+# Running the Pipeline
 
-## Standard kjøring
-
-**URL anonymisert:**
+## Using the Events API
 
 ```bash
 python3 highlights_main.py \
-  --events_url "https://lenkeTilAPI.com/.../game/<GAME_ID>/events" \
-  --model "/path/to/model.pth" \
-  --out "output.mp4"
+    --events_url "https://example-api.com/.../game/<GAME_ID>/events" \
+    --model "/path/to/model.pth" \
+    --out "output.mp4"
 ```
 
 ---
 
-## Et mer detaljert eksempel
-
-**URL anonymisert:**
+## Using a Local Events JSON File
 
 ```bash
 python3 highlights_main.py \
-  --events_url "https://lenkeTilAPI.com/.../game/<GAME_ID>/events" \
-  --model "/...../modeller/best_model_resnet34.pth" \
-  --out "/...../highlight_game_id_<GAME_ID>/highlights_<GAME_ID>.mp4" \
-  --workdir "/...../workdir_game_id_<GAME_ID>/" \
-  --highlight_sec 120 \
-  --export_xlsx \
-  --keep_workdir
+    --events_json "events.json" \
+    --model "/path/to/model.pth" \
+    --out "output.mp4"
 ```
-
-Husk å sette riktig `<GAME_ID>`.
 
 ---
 
-# Hjelp
+## A Longer Example
+
+```bash
+python3 highlights_main.py \
+    --events_url "https://example-api.com/.../game/<GAME_ID>/events" \
+    --model "/.../models/best_model_resnet34.pth" \
+    --out "/.../highlight_game_<GAME_ID>/highlights.mp4" \
+    --workdir "/.../workdir_<GAME_ID>/" \
+    --highlight_sec 120 \
+    --export_xlsx \
+    --keep_workdir
+```
+
+Replace `<GAME_ID>` with the desired game identifier.
+
+---
+
+# Help
+
+Display all available command-line options:
 
 ```bash
 python3 highlights_main.py --help
@@ -222,100 +259,112 @@ python3 highlights_main.py --help
 
 ---
 
-# Hva pipelinen gjør
+# Pipeline Overview
 
-1. Leser event-data  
-2. Finner mål  
-3. Henter score før/etter mål  
-4. Laster ned videoklipp  
-5. Kjører SportSBD / sportsbd 
-6. Finner shots og logoer  
-7. Klassifiserer kameravinkler  
-8. Deler video i:  
-   * core  
-   * core_after  
-   * replay  
-9. Velger beste segmenter  
-10. Renderer klipp med overlays  
-11. Lager intro  
-12. Slår sammen video  
+The pipeline performs the following steps:
 
----
+1. Read structured event data
+2. Parse and order goal events
+3. Compute the score before and after each goal
+4. Download the corresponding video clips
+5. Run SportSBD
+6. Detect shot boundaries and logo transitions
+7. Classify camera views
+8. Split each clip into:
 
-# Roller i systemet
-
-## SportSBD / sportsbd
-
-* finner shot boundaries  
-* finner logo-overganger  
-* deler video i struktur  
-
-**Gir struktur**
+   * core
+   * core_after
+   * replay
+9. Select core, supplementary, and replay segments within the available time budget
+10. Render each goal clip with score and scorer overlays
+11. Generate the intro sequence
+12. Merge all clips into the final highlight video
 
 ---
 
-## Kameravinkelmodell
+# System Components
 
-* klassifiserer hvert shot  
-* avgjør hva som er viktig  
+## SportSBD
 
-**Gir forståelse**
+Responsibilities:
+
+* Detect shot boundaries
+* Detect logo transitions
+* Segment the broadcast into meaningful shots
+
+**Provides the structural segmentation of the video.**
 
 ---
 
-# Viktige argumenter
+## Camera Classification Model
+
+Responsibilities:
+
+* Classify each shot according to camera view
+* Identify the main gameplay, close-up, and public/fan shots used during highlight selection
+
+**Provides semantic understanding of the broadcast content.**
+
+---
+
+# Command-Line Arguments
 
 ## Input
 
-| Argument        | Beskrivelse    |
-| --------------- | -------------- |
-| `--events_url`  | URL til events |
-| `--events_json` | Lokal JSON     |
+| Argument        | Description                           |
+| --------------- | ------------------------------------- |
+| `--events_url`  | URL to the game events endpoint       |
+| `--events_json` | Local JSON file containing event data |
 
 ---
 
-## Modell
+## Model
 
-| Argument  | Beskrivelse     |
-| --------- | --------------- |
-| `--model` | Path til modell |
+| Argument  | Description                                     |
+| --------- | ----------------------------------------------- |
+| `--model` | Path to the trained camera classification model |
 
 ---
 
 ## Output
 
-| Argument         | Beskrivelse       |
-| ---------------- | ----------------- |
-| `--out`          | Output video      |
-| `--workdir`      | Midlertidig mappe |
-| `--keep_workdir` | Behold filer      |
+| Argument         | Description                                              |
+| ---------------- | -------------------------------------------------------- |
+| `--out`          | Output highlight video                                   |
+| `--workdir`      | Temporary working directory                              |
+| `--keep_workdir` | Preserve intermediate files                              |
+| `--export_xlsx`  | Export selected segments and statistics to an Excel file |
 
 ---
 
-## Highlight
+## Highlight Settings
 
-| Argument            | Beskrivelse   |
-| ------------------- | ------------- |
-| `--highlight_sec`   | Lengde        |
-| `--transition_type` | Overgangstype |
-| `--transition_sec`  | Varighet      |
+| Argument            | Description ----------------------------------------------------------------------------------------------------- |
+| `--highlight_sec`   | Target highlight duration                                                     |
+| `--transition_type` | FFmpeg `xfade` transition (default: `fade`); use `none` to disable transitions| 
+| `--transition_sec`  | Transition duration in seconds (default: `0.5)                                |
+---
+
+## Segmentation
+
+| Argument                    | Description                                                   | ----------------------------------------------------------------------------------------------|
+| `--min_valid_core_main_sec` | Minimum duration of the detected core main-camera sequence    |
+| `--tolerate_nonmain_sec`    | Maximum tolerated interruption by non-main camera views       |
+| `--min_segment_sec`         | Minimum segment duration                                      |
+| `--pad_ms`                  | Padding around detected logo transitions                      |
+| `--sbd_threshold`           | SportSBD shot boundary detection threshold                    |
+| `--min_gap_ms`              | Minimum temporal gap between detected boundaries              |
+| `--edge_guard_ms`           | Trim noisy boundaries at segment edges                        |
+| `--core_main_nonmain_ms`    | End the main-camera sequence after prolonged non-main footage |
 
 ---
 
-## Segmentering
+# Output
 
-| Argument                    | Beskrivelse      |
-| --------------------------- | ---------------- |
-| `--min_valid_core_main_sec` | Min core-main    |
-| `--tolerate_nonmain_sec`    | Toleranse        |
-| `--min_segment_sec`         | Min klipplengde  |
-| `--pad_ms`                  | Padding          |
-| `--sbd_threshold`           | SportSBD terskel |
-| `--min_gap_ms`              | Gap              |
-| `--edge_guard_ms`           | Fjern støy       |
-| `--core_main_nonmain_ms`    | Stop main        |
+The pipeline produces:
 
----
-## Eksempler på genererte høydepunktvideoer ved hjelp av pipelinen kan ses her:
-https://www.youtube.com/watch?v=fFWW_p3nbCc&list=PLYmB0x6MhzbEaTndqWwF1BemEVxiXNCH5&index=1
----
+* Final highlight video (`.mp4`)
+* Optional Excel summary (`segments.xlsx`) when `--export_xlsx` is enabled
+* Temporary working directory (optional, if `--keep_workdir` is specified)
+
+The generated highlights preserve the chronological order of goals while prioritizing continuous gameplay and supplementing it with reaction and replay footage when the available time budget allows.
