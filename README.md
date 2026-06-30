@@ -337,28 +337,32 @@ Responsibilities:
 
 ---
 
+```
 ## Highlight Settings
 
-| Argument            | Description ----------------------------------------------------------------------------------------------------- |
-| `--highlight_sec`   | Target highlight duration                                                     |
-| `--transition_type` | FFmpeg `xfade` transition (default: `fade`); use `none` to disable transitions| 
-| `--transition_sec`  | Transition duration in seconds (default: `0.5)                                |
+| Argument | Description |
+|----------|-------------|
+| `--highlight_sec` | Target highlight duration in seconds |
+| `--transition_type` | FFmpeg `xfade` transition type. Default: `fade`; use `none` to disable transitions |
+| `--transition_sec` | Transition duration in seconds. Default: `0.5` |
+
 ---
 
 ## Segmentation
 
-| Argument                    | Description                                                   | ----------------------------------------------------------------------------------------------|
-| `--min_valid_core_main_sec` | Minimum duration of the detected core main-camera sequence    |
-| `--tolerate_nonmain_sec`    | Maximum tolerated interruption by non-main camera views       |
-| `--min_segment_sec`         | Minimum segment duration                                      |
-| `--pad_ms`                  | Padding around detected logo transitions                      |
-| `--sbd_threshold`           | SportSBD shot boundary detection threshold                    |
-| `--min_gap_ms`              | Minimum temporal gap between detected boundaries              |
-| `--edge_guard_ms`           | Trim noisy boundaries at segment edges                        |
-| `--core_main_nonmain_ms`    | End the main-camera sequence after prolonged non-main footage |
+| Argument | Description |
+|----------|-------------|
+| `--min_valid_core_main_sec` | Minimum duration of the detected core main-camera sequence |
+| `--tolerate_nonmain_sec` | Maximum tolerated interruption by non-main camera views |
+| `--min_segment_sec` | Minimum segment duration |
+| `--pad_ms` | Padding around detected logo transitions |
+| `--sbd_threshold` | SportSBD shot boundary detection threshold |
+| `--min_gap_ms` | Minimum temporal gap between detected boundaries |
+| `--edge_guard_ms` | Trim noisy boundaries at segment edges |
+| `--core_main_nonmain_ms` | End the main-camera sequence after prolonged non-main footage |
 
 ---
-
+```
 # Output
 
 The pipeline produces:
