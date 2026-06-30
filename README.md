@@ -337,7 +337,7 @@ Responsibilities:
 
 ---
 
-```
+
 ## Highlight Settings
 
 | Argument | Description |
@@ -362,7 +362,7 @@ Responsibilities:
 | `--core_main_nonmain_ms` | End the main-camera sequence after prolonged non-main footage |
 
 ---
-```
+
 # Output
 
 The pipeline produces:
