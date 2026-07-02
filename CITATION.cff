@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it using the metadata from this file."
+type: software
+
+title: "Automatic Highlight Generation for Ice Hockey"
+
+authors:
+  - family-names: "Sarkhoosh"
+    given-names: "Mehdi Houshmand"
+  - family-names: "KJELSRUD BJØRDAL"
+    given-names: "DANIEL"
+  - family-names: "BETTIN"
+    given-names: "KAMIL"
+  - family-names: "LUKAS JAHR"
+    given-names: "ALEXANDER"
+  - family-names: "KVANDAL"
+    given-names: "MAGNUS"
+  - family-names: "KYOSEV"
+    given-names: "HRISTO"
+  - family-names: "SAMANTHA RECORD"
+    given-names: "RENA"
+  - family-names: "AZIZUL ISLAM YASIN"
+    given-names: "MOHAMMAD"  
+  - family-names: "Midoglu"
+    given-names: "Cise"
+  - family-names: "Halvorsen"
+    given-names: "Pål"
+
+year: 2026
+repository-code: "https://github.com/forzasys-students/highlight-generation-icehockey"
+url: "https://github.com/forzasys-students/highlight-generation-icehockey"
+
+abstract: "This repository contains the implementation for automatic highlight generation for ice hockey contents."
+
+keywords:
+  - Sports video analysis
+  - Computer vision
+  - Highlight generation
